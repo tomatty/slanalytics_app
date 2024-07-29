@@ -57,10 +57,10 @@ if 'create_dataframe' not in st.session_state:
 # ラジオボタンでデータの読み込み方法を選択
 data_source = st.sidebar.radio(
     "Choose data source",
-    ('Upload Files', 'Load from URL')
+    ('Upload Files(Available)', 'Load from URL(Under Construction)')
     ,index=0)
 
-if data_source == 'Upload Files':
+if data_source == 'Upload Files(Available)':
     st.sidebar.subheader('Upload train and test files')
     uploaded_train_file = st.sidebar.file_uploader("Choose a train file", type=['csv', 'tsv', 'xlsx'], key='train')
     uploaded_test_file = st.sidebar.file_uploader("Choose a test file", type=['csv', 'tsv', 'xlsx'], key='test')
