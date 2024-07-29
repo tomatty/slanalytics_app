@@ -58,7 +58,7 @@ if 'create_dataframe' not in st.session_state:
 data_source = st.sidebar.radio(
     "Choose data source",
     ('Upload Files', 'Load from URL')
-    ,index=1)
+    ,index=0)
 
 if data_source == 'Upload Files':
     st.sidebar.subheader('Upload train and test files')
