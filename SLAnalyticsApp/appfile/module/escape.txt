@@ -1,0 +1,91 @@
+
+--------------------------------------------
+params_default = {
+    'objective': 'mae',
+    'random_seed': 1234,
+    'learning_rate': 0.02,
+    'min_data_in_bin': 3,
+    'bagging_freq': 1,
+    'bagging_seed': 0,
+    'verbose': -1,
+}
+
+# Streamlitインターフェースの作成
+st.title("LightGBM PreHyperparameter Tuning")
+
+# ハイパーパラメータの入力
+objective = st.selectbox('Objective', ['mae', 'mse', 'binary'], index=0)
+random_seed = st.number_input('Random Seed', value=params_base['random_seed'])
+learning_rate = st.number_input('Learning Rate', value=params_base['learning_rate'])
+min_data_in_bin = st.number_input('Min Data in Bin', value=params_base['min_data_in_bin'])
+bagging_freq = st.number_input('Bagging Frequency', value=params_base['bagging_freq'])
+bagging_seed = st.number_input('Bagging Seed', value=params_base['bagging_seed'])
+verbose = st.selectbox('Verbose', [-1, 0, 1], index=0)
+
+# 選択されたハイパーパラメータを表示
+params_base = {
+    'objective': objective,
+    'random_seed': random_seed,
+    'learning_rate': learning_rate,
+    'min_data_in_bin': min_data_in_bin,
+    'bagging_freq': bagging_freq,
+    'bagging_seed': bagging_seed,
+    'verbose': verbose,
+}
+
+# ハイパーパラメータの探索範囲
+def objective(trial, x_tr, y_tr, x_va, y_va):
+    params_tuning = {
+        'num_leaves': trial.suggest_int('num_leaves', 50, 200),
+        'min_data_in_leaf': trial.suggest_int('min_data_in_leaf', 2, 30),
+        'max_bin': trial.suggest_int('max_bin', 200, 400),
+        'bagging_fraction': trial.suggest_float('bagging_fraction', 0.8, 0.95),
+        'feature_fraction': trial.suggest_float('feature_fraction', 0.35, 0.65),
+        'min_gain_to_split': trial.suggest_float('min_gain_to_split', 0.01, 1, log=True),
+        'lambda_11': trial.suggest_float('lambda_11', 0.01, 1, log=True),
+        'lambda_12': trial.suggest_float('lambda_12', 0.01, 1, log=True)
+
+    }
+
+    # 探索用ハイパーパラメータの設定
+    params_tuning.update(params_base)
+    lgb_train = lgb.Dataset(x_tr, y_tr)
+    lgb_eval = lgb.Dataset(x_va, y_va)
+
+    #探索用ハイパーパラメータで学習
+    model = lgb.train(params_tuning,
+                      lgb_train,
+                      num_boost_round=10000,
+                      valid_sets=[lgb_train, lgb_eval],
+                      valid_names=['train', 'valid'],
+                      callbacks=[
+                          lgb.early_stopping(100),
+                          lgb.log_evaluation(500)
+                      ])
+    y_va_pred = model.predict(x_va, num_iteration=model.best_iteration)
+    score = mean_absolute_error(y_va, y_pred)
+    print('')
+    return score
+
+# ハイパーパラメータ最適化の実行
+sampler_option = st.radio('Sampler', ['TPESampler', 'RandomSampler'], index=0)
+
+if sampler_option == 'TPESampler':
+    sampler = optuna.samplers.TPESampler(seed=0)
+else:
+    sampler = optuna.samplers.RandomSampler(seed=0)
+
+study = optuna.create_study(sampler=sampler, direction='minimize')
+study.optimize(objective, n_trials=200)
+
+# 最適化の結果を確認
+trial = study.best_trial
+print(f'trial {trial.number}')
+print('MAE best: %.2f'% trial.value)
+display(trial.params)
+
+# 最適化ハイパーパラメータの設定
+params_best = trial.params
+params_best.update(params_base)
+display(params_best)
+--------------------------------------------

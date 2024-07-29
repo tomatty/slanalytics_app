@@ -1,0 +1,10 @@
+services:
+  streamlit_app:
+    build: .
+    container_name: slanalytics_app
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/work
+    environment:
+      - PYTHONPATH=/work
