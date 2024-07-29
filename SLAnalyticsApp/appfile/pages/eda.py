@@ -28,7 +28,7 @@ TEST_FILE_URL = "https://signate.jp/competitions/266/data/1006"
 def check_file(file):
     # ファイルサイズチェック（10GB以下）
     if file.size > 10 * 1024 * 1024 * 1024:
-        return False, "File size should be less than 5MB"
+        return False, "File size should be less than 10GB"
     
     # ファイル拡張子チェック
     if not file.name.endswith(('.csv', '.tsv', '.xlsx')):
