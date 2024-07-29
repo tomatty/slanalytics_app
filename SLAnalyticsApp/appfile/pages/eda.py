@@ -26,8 +26,8 @@ TRAIN_FILE_URL = "https://signate.jp/competitions/266/data/1005"
 TEST_FILE_URL = "https://signate.jp/competitions/266/data/1006"
 
 def check_file(file):
-    # ファイルサイズチェック（5MB以下）
-    if file.size > 5 * 1024 * 1024:
+    # ファイルサイズチェック（10GB以下）
+    if file.size > 10 * 1024 * 1024 * 1024:
         return False, "File size should be less than 5MB"
     
     # ファイル拡張子チェック
