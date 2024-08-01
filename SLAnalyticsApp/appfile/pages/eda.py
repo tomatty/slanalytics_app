@@ -144,6 +144,26 @@ else:
             st.experimental_rerun()
 
 
+st.sidebar.markdown('---')
+
+if st.session_state.create_dataframe and st.session_state.df is not None:
+    visualization = DataVisualization(st.session_state.df)
+    visualization.show_top_100_rows()
+    visualization.show_columns_info()
+    visualization.show_numeric_describe()
+    visualization.show_non_numeric_describe()
+    visualization.show_missing_ratio()
+    visualization.show_correlation_heatmap()
+    visualization.show_pairplot()
+    visualization.show_histogram()
+    visualization.show_value_counts()
+    visualization.show_box_plot()
+    visualization.show_violin_plot()
+    visualization.show_pareto_chart()
+    visualization.show_pivot_table()
+
+
+
 """
 # ファイルアップローダー
 st.sidebar.subheader('Upload train and test files')
@@ -222,20 +242,3 @@ if uploaded_train_file and uploaded_test_file:
         if not is_valid_test:
             st.sidebar.write(f"Error in test file: {error_message_test}")
 """
-
-st.sidebar.markdown('---')
-
-if st.session_state.create_dataframe and st.session_state.df is not None:
-    visualization = DataVisualization(st.session_state.df)
-    visualization.show_top_100_rows()
-    visualization.show_columns_info()
-    visualization.show_numeric_describe()
-    visualization.show_non_numeric_describe()
-    visualization.show_missing_ratio()
-    visualization.show_correlation_heatmap()
-    visualization.show_pairplot()
-    visualization.show_histogram()
-    visualization.show_box_plot()
-    visualization.show_violin_plot()
-    visualization.show_pareto_chart()
-    visualization.show_pivot_table()
