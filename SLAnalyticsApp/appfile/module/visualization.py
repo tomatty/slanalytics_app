@@ -180,3 +180,12 @@ class DataVisualization:
             if selected_columns and target_column:
                 fig = px.violin(self.df, y=selected_columns, x=target_column, title=f'Violin Plot of {", ".join(selected_columns)} against {target_column}')
                 st.plotly_chart(fig)
+
+    def show_value_counts(self):
+        if st.sidebar.checkbox('Show value counts'):
+            columns = self.df.columns.tolist()
+            selected_column = st.selectbox('Select column for value counts', columns)
+            if selected_column:
+                value_counts = self.df[selected_column].value_counts()
+                st.write(f'Value counts for {selected_column}:')
+                st.write(value_counts)
