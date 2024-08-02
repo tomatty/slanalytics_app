@@ -21,10 +21,7 @@ st.sidebar.markdown('---')
 st.title('Exploratory Data Analysis')
 
 
-# URLから読み込むための設定
-TRAIN_FILE_URL = "https://signate.jp/competitions/266/data/1005"
-TEST_FILE_URL = "https://signate.jp/competitions/266/data/1006"
-
+# ダミーのファイルチェック関数
 def check_file(file):
     # ファイルサイズチェック（10GB以下）
     if file.size > 10 * 1024 * 1024 * 1024:
@@ -36,10 +33,20 @@ def check_file(file):
     
     return True, None
 
-def load_data(url):
+# ディレクトリからデータを読み込む関数
+def load_data_from_directory(filename):
     try:
-        df = pd.read_csv(url)
-        return df, None
+        # スクリプトのディレクトリを基準に絶対パスを生成
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(base_dir, '..', 'data', filename)
+        
+        if filename.endswith('.csv'):
+            data = pd.read_csv(file_path)
+        elif filename.endswith('.tsv'):
+            data = pd.read_csv(file_path, sep='\t')
+        elif filename.endswith('.xlsx'):
+            data = pd.read_excel(file_path)
+        return data, None
     except Exception as e:
         return None, str(e)
 
@@ -57,8 +64,8 @@ if 'create_dataframe' not in st.session_state:
 # ラジオボタンでデータの読み込み方法を選択
 data_source = st.sidebar.radio(
     "Choose data source",
-    ('Upload Files(Available)', 'Load from URL(Under Construction)')
-    ,index=0)
+    ('Upload Files(Available)', 'SIGNATE Cup 2024(Available)')
+    , index=1)
 
 if data_source == 'Upload Files(Available)':
     st.sidebar.subheader('Upload train and test files')
@@ -115,33 +122,40 @@ if data_source == 'Upload Files(Available)':
             if not is_valid_test:
                 st.sidebar.write(f"Error in test file: {error_message_test}")
 else:
-    st.sidebar.subheader('Load train and test files from URL')
+    st.sidebar.subheader('Load train and test files from SIGNATE Cup 2024')
     
-    train_data, error_train = load_data(TRAIN_FILE_URL)
-    test_data, error_test = load_data(TEST_FILE_URL)
+    # スクリプトのディレクトリを基準に絶対パスを生成
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(base_dir, '..', 'data')
 
-    if error_train or error_test:
-        st.sidebar.error(f"Error loading data from URL: {error_train or error_test}")
+    if not os.path.exists(data_dir):
+        st.sidebar.error(f"Directory '{data_dir}' does not exist.")
     else:
-        st.sidebar.write("Train and test files loaded from URL are ready.")
-        
-        col1, col2 = st.sidebar.columns(2)
-        with col1:
-            confirm_button = st.button('Create DataFrame')
-        with col2:
-            refresh_button = st.button('Refresh')
-        
-        if confirm_button:
-            if train_data is not None and test_data is not None:
-                st.session_state.df = pd.concat([train_data, test_data], ignore_index=True)
-                st.sidebar.success("Files successfully combined!")
-                st.session_state.create_dataframe = True
-            else:
-                st.sidebar.error("Failed to read the files from URL.")
-        if refresh_button:
-            st.session_state.df = None
-            st.session_state.create_dataframe = False
-            st.experimental_rerun()
+        train_data, error_train = load_data_from_directory('train.csv')
+        test_data, error_test = load_data_from_directory('test.csv')
+
+        if error_train or error_test:
+            st.sidebar.error(f"Error loading data from directory: {error_train or error_test}")
+        else:
+            st.sidebar.write("Train and test files loaded from SIGNATE Cup 2024 are ready.")
+            
+            col1, col2 = st.sidebar.columns(2)
+            with col1:
+                confirm_button = st.button('Create DataFrame')
+            with col2:
+                refresh_button = st.button('Refresh')
+            
+            if confirm_button:
+                if train_data is not None and test_data is not None:
+                    st.session_state.df = pd.concat([train_data, test_data], ignore_index=True)
+                    st.sidebar.success("Files successfully combined!")
+                    st.session_state.create_dataframe = True
+                else:
+                    st.sidebar.error("Failed to read the files from directory.")
+            if refresh_button:
+                st.session_state.df = None
+                st.session_state.create_dataframe = False
+                st.experimental_rerun()
 
 
 st.sidebar.markdown('---')
