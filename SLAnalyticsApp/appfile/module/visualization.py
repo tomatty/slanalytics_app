@@ -52,7 +52,7 @@ class DataVisualization:
                     st.plotly_chart(fig)
 
     def show_correlation_heatmap(self):
-        if st.sidebar.checkbox('Show correlation heatmap', value=True):
+        if st.sidebar.checkbox('Show correlation heatmap'):
             corr_matrix = self.df.corr()
             fig = ff.create_annotated_heatmap(
                 z=corr_matrix.values,
@@ -69,7 +69,7 @@ class DataVisualization:
             st.plotly_chart(fig, use_container_width=True)
 
     def show_pairplot(self):
-        if st.sidebar.checkbox('Show pairplot', value=True):
+        if st.sidebar.checkbox('Show pairplot'):
             numeric_columns = self.df.select_dtypes(include=['float64', 'int64']).columns.tolist()
             all_columns = ['Select all'] + numeric_columns
             selected_columns = st.multiselect('Select columns for pairplot', all_columns, default=['Select all'])
